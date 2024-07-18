@@ -193,7 +193,7 @@ toku:active{
     <input style="background-color: yellow;" type="text" size="3" id="page-number">
     of <span id="number-pages"></span>
     <button style="background-color: white; color: black; font-weight: bolder; border-radius: 30px; height: 50px; width: 150px;" id="read-button">Read the Text<br><img style="width: 20px; height: 20px;" src="audio.png"></button>
-	<toku>Automatic Mode</toku>
+	<toku id="automatic-mode-button">Automatic Mode</toku>
 </div>
 
 
@@ -206,11 +206,10 @@ toku:active{
 
 </center>
 
-<audio  id="turn-front-sound" src="turnfront.mp3"></audio>
+<audio id="turn-front-sound" src="turnfront.mp3"></audio>
 <audio id="turn-back-sound" src="turnback.mp3"></audio>
 
 <script type="text/javascript">
-
 	var numberOfPages = 36; 
 
 	var storyContent = [
@@ -256,7 +255,7 @@ toku:active{
 
 
 
-    var currentAudio = null;
+
 
 	function addPage(page, book) {
 		if (!book.turn('hasPage', page)) {
@@ -268,81 +267,131 @@ toku:active{
 	}
 
 	$(document).ready(function() {
-        // Existing turn.js initialization and setup
-        $('#book').turn({
-            acceleration: true,
-            pages: numberOfPages,
-            elevation: 50,
-            gradients: !$.isTouch,
-            when: {
-                turning: function(e, page, view) {
-                    var book = $(this),
-                        currentPage = book.turn('page'),
-                        pages = book.turn('pages');
+		// Initialize turn.js
+		var numberOfPages = 36;
+		$('#book').turn({
+			acceleration: true,
+			pages: numberOfPages,
+			elevation: 50,
+			gradients: !$.isTouch,
+			when: {
+				turning: function(e, page, view) {
+					var book = $(this),
+						currentPage = book.turn('page'),
+						pages = book.turn('pages');
 
-                    if (page == 1) {
-                        $('#prev-button').hide();
-                    } else {
-                        $('#prev-button').show();
-                    }
+					if (page == 1) {
+						$('#prev-button').hide();
+					} else {
+						$('#prev-button').show();
+					}
 
-                    if (page == pages) {
-                        $('#next-button').hide();
-                    } else {
-                        $('#next-button').show();
-                    }
+					if (page == pages) {
+						$('#next-button').hide();
+					} else {
+						$('#next-button').show();
+					}
 
-                    $('#page-number').val(page);
-                },
-                turned: function(e, page, view) {
-                    $('#page-number').val(page);
-                    var book = $(this);
-                    $('#prev-button').toggle(page != 1);
-                    $('#next-button').toggle(page != book.turn('pages'));
-                }
-            }
-        });
+					$('#page-number').val(page);
+				},
+				turned: function(e, page, view) {
+					$('#page-number').val(page);
+					var book = $(this);
+					$('#prev-button').toggle(page != 1);
+					$('#next-button').toggle(page != book.turn('pages'));
+				}
+			}
+		});
 
-        for (var page = 1; page <= numberOfPages; page++) {
-            addPage(page, $('#book'));
-        }
+		// Add pages dynamically
+		for (var page = 1; page <= numberOfPages; page++) {
+			addPage(page, $('#book'));
+		}
 
-        $('#number-pages').html(numberOfPages);
+		// Update number of pages
+		$('#number-pages').html(numberOfPages);
 
-        $('#page-number').keydown(function(e) {
-            if (e.keyCode == 13) {
-                $('#book').turn('page', $('#page-number').val());
-            }
-        });
+		// Navigation using page number input field
+		$('#page-number').keydown(function(e) {
+			if (e.keyCode == 13) {
+				$('#book').turn('page', $('#page-number').val());
+			}
+		});
 
-        $('#prev-button').click(function() {
-            $('#book').turn('previous');
-            document.getElementById('turn-back-sound').play();
-        });
+		// Navigation using previous button
+		$('#prev-button').click(function() {
+			$('#book').turn('previous');
+			document.getElementById('turn-back-sound').play();
+		});
 
-        $('#next-button').click(function() {
-            $('#book').turn('next');
-            document.getElementById('turn-front-sound').play();
-        });
+		// Navigation using next button
+		$('#next-button').click(function() {
+			$('#book').turn('next');
+			document.getElementById('turn-front-sound').play();
+		});
 
-        document.getElementById('prev-button').style.display = 'none';
+		// Initialize variables for audio control
+		var currentAudio = null;
+		var isPlaying = false; // Flag to track if audio is currently playing
+		var isSequenceInProgress = false; // Flag to track if the automatic sequence is in progress
 
-        // Add event listener for the "Read the Text" button
-        $('#read-button').click(function() {
-            var currentPage = $('#book').turn('page');
-            playAudioForPage(currentPage);
-        });
+		// Function to play audio for a given page
+		function playAudioForPage(page) {
+			if (currentAudio) {
+				currentAudio.pause(); // Pause current audio if playing
+				currentAudio = null;
+			}
 
-        function playAudioForPage(page) {
-            if (currentAudio && !currentAudio.ended) {
-                return; // If an audio is already playing, do not start a new one
-            }
+			currentAudio = new Audio(page + 'h.mp3');
+			currentAudio.play();
 
-            currentAudio = new Audio(page + 'h.mp3');
-            currentAudio.play();
-        }
-    });
+			currentAudio.onended = function() {
+				currentAudio = null;
+				isPlaying = false; // Reset flag when audio finishes
+				// Automatically turn page and play next audio
+				if (isSequenceInProgress) {
+					setTimeout(function() {
+						var nextPage = getNextPage(page);
+						if (nextPage) {
+							$('#book').turn('page', nextPage);
+							playAudioForPage(nextPage);
+						} else {
+							isSequenceInProgress = false; // End sequence if no more pages
+						}
+					}, 1000); // Delay before turning page, adjust as needed
+				}
+			};
 
+			isPlaying = true; // Set flag when audio starts playing
+		}
+
+		// Function to get the next page in the sequence
+		function getNextPage(currentPage) {
+			var pagesToPlay = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36];
+			var currentIndex = pagesToPlay.indexOf(currentPage);
+			if (currentIndex >= 0 && currentIndex < pagesToPlay.length - 1) {
+				return pagesToPlay[currentIndex + 1];
+			}
+			return null;
+		}
+
+		// Read the Text button functionality
+		$('#read-button').click(function() {
+			var currentPage = $('#book').turn('page');
+			playAudioForPage(currentPage);
+		});
+
+		// Automatic mode functionality
+		$('#automatic-mode-button').click(function() {
+			if (isSequenceInProgress) {
+				return; // Ignore click if sequence is already in progress
+			}
+
+			isSequenceInProgress = true; // Set sequence flag
+			var currentPage = $('#book').turn('page');
+			playAudioForPage(currentPage);
+		});
+	});
 </script>
 </body>
 </html>
