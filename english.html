@@ -126,6 +126,53 @@ footer {
 	font-size: 18px;
 	color: #555;
 }
+toku{
+	--glow-color: rgb(246, 255, 0);
+	--glow-spread-color: rgba(191,123,255,0.781);
+	--enhanced-glow-color: rgb(231,206,255);
+	--btn-color: rgb(100,61,136);
+	border: 0.25em solid var(--glow-color);
+	padding: 1em 3em;
+	color: var(--glow-color);
+	font-size: 15px;
+	font-weight: bold;
+	background-color: var(--btn-color);
+	border-radius: 1em;
+	outline: none;
+	box-shadow: 0 0 1em 0.25em var(--glow-color),
+	0 0 4em 1em var(--glow-spread-color),
+	inset 0 0 0.75em 0.25em var(--glow-color);
+	text-shadow: 0 0 0.5em var(--glow-color);
+	position: relative;
+	transition: all 0.3s;
+}
+
+toku::after{
+	pointer-events: none;
+	content: "";
+	position: absolute;
+	top: 120%;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	filter:blur()2em;
+	opacity: 0.7;
+	transform: perspective(1.5em) rotateX(35deg) scale(1,0.5);
+}
+
+toku:hover{
+	color: var(--btn-color);
+	background-color: var(--glow-color);
+	box-shadow: 0 0 1em 0.25em var(--glow-color),
+	0 0 4em 2em var(--glow-spread-color),
+	inset 0 0 0.75em 0.25em var(--glow-color);
+}
+
+toku:active{
+	box-shadow: 0 0 0.6em 0.25em var(--glow-color),
+	0 0 2.5em 2em var(--glow-spread-color),
+	inset 0 0 0.5em 0.25em var(--glow-color);
+}
 </style>
 </head>
 <body>
@@ -144,6 +191,8 @@ footer {
     <input style="background-color: yellow;" type="text" size="3" id="page-number">
     of <span id="number-pages"></span>
     <button style="background-color: white; color: black; font-weight: bolder; border-radius: 30px; height: 50px; width: 150px;" id="read-button">Read the Text<br><img style="width: 20px; height: 20px;" src="audio.png"></button>
+	<toku id="automatic-mode-button">Automatic Mode</toku>
+
 </div>
 
 
@@ -156,14 +205,11 @@ footer {
 
 </center>
 
-<audio  id="turn-front-sound" src="turnfront.mp3"></audio>
+<audio id="turn-front-sound" src="turnfront.mp3"></audio>
 <audio id="turn-back-sound" src="turnback.mp3"></audio>
-
 <script type="text/javascript">
-
-	var numberOfPages = 36; 
-
-	var storyContent = [
+var numberOfPages = 36; 
+var storyContent = [
 		"",
 		"Once upon a time, there lived two kings, Saksham Pratap and Lalaji Prasad, who ruled their kingdoms, Atiroopa and Tajasthan, respectively. Their bond was as strong as that of brothers, marked by fraternity and harmony. They celebrated festivals together, shared resources during difficult times, and their citizens admired ",
 		"the deep friendship between the two rulers.<img style='height: 250px; width: 350px;' src='kingomstart.jpg'/>Atiroopa & Tajasthan",
@@ -202,6 +248,9 @@ footer {
 		"<img style='height: 250px; width: 350px;' src='town.jpg'/><h5>The story about how a town rebuilds itself after a war - The Rebirth Of Karnasthan,<br> Written by - Aditya Soni</h5>"
 	];
 
+
+
+
 	function addPage(page, book) {
 		if (!book.turn('hasPage', page)) {
 			var content = storyContent[page - 1] || 'Content for page ' + page;
@@ -212,7 +261,8 @@ footer {
 	}
 
 	$(document).ready(function() {
-    // Existing turn.js initialization and setup
+    // Initialize turn.js
+    var numberOfPages = 36;
     $('#book').turn({
         acceleration: true,
         pages: numberOfPages,
@@ -247,41 +297,94 @@ footer {
         }
     });
 
+    // Add pages dynamically
     for (var page = 1; page <= numberOfPages; page++) {
         addPage(page, $('#book'));
     }
 
+    // Update number of pages
     $('#number-pages').html(numberOfPages);
 
+    // Navigation using page number input field
     $('#page-number').keydown(function(e) {
         if (e.keyCode == 13) {
             $('#book').turn('page', $('#page-number').val());
         }
     });
 
+    // Navigation using previous button
     $('#prev-button').click(function() {
         $('#book').turn('previous');
         document.getElementById('turn-back-sound').play();
     });
 
+    // Navigation using next button
     $('#next-button').click(function() {
         $('#book').turn('next');
         document.getElementById('turn-front-sound').play();
     });
 
-    document.getElementById('prev-button').style.display = 'none';
+    // Initialize variables for audio control
+    var currentAudio = null;
+    var isPlaying = false; // Flag to track if audio is currently playing
+    var isSequenceInProgress = false; // Flag to track if the automatic sequence is in progress
 
-    // Add event listener for the "Read the Text" button
+    // Function to play audio for a given page
+    function playAudioForPage(page) {
+        if (currentAudio) {
+            currentAudio.pause(); // Pause current audio if playing
+            currentAudio = null;
+        }
+
+        currentAudio = new Audio(page + '.mp3');
+        currentAudio.play();
+
+        currentAudio.onended = function() {
+            currentAudio = null;
+            isPlaying = false; // Reset flag when audio finishes
+        };
+
+        isPlaying = true; // Set flag when audio starts playing
+    }
+
+    // Read the Text button functionality
     $('#read-button').click(function() {
         var currentPage = $('#book').turn('page');
         playAudioForPage(currentPage);
     });
 
-    function playAudioForPage(page) {
-        var audio = new Audio(page + '.mp3');
-        audio.play();
-    }
+    // Automatic mode functionality
+    $('#automatic-mode-button').click(function() {
+        if (isSequenceInProgress) {
+            return; // Ignore click if sequence is already in progress
+        }
+
+        var pagesToPlay = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36];
+        var currentIndex = 0;
+        var intervalId;
+
+        function playNextPage() {
+            if (!isPlaying && currentIndex < pagesToPlay.length) {
+                var nextPage = pagesToPlay[currentIndex];
+                $('#book').turn('page', nextPage);
+                playAudioForPage(nextPage);
+                currentIndex++;
+            } else if (currentIndex >= pagesToPlay.length) {
+                clearInterval(intervalId); // Stop when all pages are done
+                isSequenceInProgress = false; // Reset sequence flag
+            }
+        }
+
+        // Start automatic mode
+        isSequenceInProgress = true; // Set sequence flag
+        playNextPage(); // Start immediately
+
+        // Set interval to advance pages and play audio
+        intervalId = setInterval(playNextPage, 8000); // Adjust interval as per your audio duration
+    });
 });
+
+
 
 
 </script>

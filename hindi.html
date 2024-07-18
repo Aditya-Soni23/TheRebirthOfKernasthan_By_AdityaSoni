@@ -6,7 +6,6 @@
 <title>A story Written By Aditya Soni</title>
 <link rel="icon" href="advertisement.jpg" type="image/icon type">
 
-
 <style type="text/css">
 body {
 	background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
@@ -126,6 +125,56 @@ footer {
 	font-size: 18px;
 	color: #555;
 }
+
+toku{
+	--glow-color: rgb(246, 255, 0);
+	--glow-spread-color: rgba(191,123,255,0.781);
+	--enhanced-glow-color: rgb(231,206,255);
+	--btn-color: rgb(100,61,136);
+	border: 0.25em solid var(--glow-color);
+	padding: 1em 3em;
+	color: var(--glow-color);
+	font-size: 15px;
+	font-weight: bold;
+	background-color: var(--btn-color);
+	border-radius: 1em;
+	outline: none;
+	box-shadow: 0 0 1em 0.25em var(--glow-color),
+	0 0 4em 1em var(--glow-spread-color),
+	inset 0 0 0.75em 0.25em var(--glow-color);
+	text-shadow: 0 0 0.5em var(--glow-color);
+	position: relative;
+	transition: all 0.3s;
+}
+
+toku::after{
+	pointer-events: none;
+	content: "";
+	position: absolute;
+	top: 120%;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	filter:blur()2em;
+	opacity: 0.7;
+	transform: perspective(1.5em) rotateX(35deg) scale(1,0.5);
+}
+
+toku:hover{
+	color: var(--btn-color);
+	background-color: var(--glow-color);
+	box-shadow: 0 0 1em 0.25em var(--glow-color),
+	0 0 4em 2em var(--glow-spread-color),
+	inset 0 0 0.75em 0.25em var(--glow-color);
+}
+
+toku:active{
+	box-shadow: 0 0 0.6em 0.25em var(--glow-color),
+	0 0 2.5em 2em var(--glow-spread-color),
+	inset 0 0 0.5em 0.25em var(--glow-color);
+}
+
+
 </style>
 </head>
 <body>
@@ -144,6 +193,7 @@ footer {
     <input style="background-color: yellow;" type="text" size="3" id="page-number">
     of <span id="number-pages"></span>
     <button style="background-color: white; color: black; font-weight: bolder; border-radius: 30px; height: 50px; width: 150px;" id="read-button">Read the Text<br><img style="width: 20px; height: 20px;" src="audio.png"></button>
+	<toku>Automatic Mode</toku>
 </div>
 
 
@@ -203,6 +253,11 @@ footer {
 	];
 
 
+
+
+
+    var currentAudio = null;
+
 	function addPage(page, book) {
 		if (!book.turn('hasPage', page)) {
 			var content = storyContent[page - 1] || 'Content for page ' + page;
@@ -213,77 +268,80 @@ footer {
 	}
 
 	$(document).ready(function() {
-    // Existing turn.js initialization and setup
-    $('#book').turn({
-        acceleration: true,
-        pages: numberOfPages,
-        elevation: 50,
-        gradients: !$.isTouch,
-        when: {
-            turning: function(e, page, view) {
-                var book = $(this),
-                    currentPage = book.turn('page'),
-                    pages = book.turn('pages');
+        // Existing turn.js initialization and setup
+        $('#book').turn({
+            acceleration: true,
+            pages: numberOfPages,
+            elevation: 50,
+            gradients: !$.isTouch,
+            when: {
+                turning: function(e, page, view) {
+                    var book = $(this),
+                        currentPage = book.turn('page'),
+                        pages = book.turn('pages');
 
-                if (page == 1) {
-                    $('#prev-button').hide();
-                } else {
-                    $('#prev-button').show();
+                    if (page == 1) {
+                        $('#prev-button').hide();
+                    } else {
+                        $('#prev-button').show();
+                    }
+
+                    if (page == pages) {
+                        $('#next-button').hide();
+                    } else {
+                        $('#next-button').show();
+                    }
+
+                    $('#page-number').val(page);
+                },
+                turned: function(e, page, view) {
+                    $('#page-number').val(page);
+                    var book = $(this);
+                    $('#prev-button').toggle(page != 1);
+                    $('#next-button').toggle(page != book.turn('pages'));
                 }
-
-                if (page == pages) {
-                    $('#next-button').hide();
-                } else {
-                    $('#next-button').show();
-                }
-
-                $('#page-number').val(page);
-            },
-            turned: function(e, page, view) {
-                $('#page-number').val(page);
-                var book = $(this);
-                $('#prev-button').toggle(page != 1);
-                $('#next-button').toggle(page != book.turn('pages'));
             }
+        });
+
+        for (var page = 1; page <= numberOfPages; page++) {
+            addPage(page, $('#book'));
+        }
+
+        $('#number-pages').html(numberOfPages);
+
+        $('#page-number').keydown(function(e) {
+            if (e.keyCode == 13) {
+                $('#book').turn('page', $('#page-number').val());
+            }
+        });
+
+        $('#prev-button').click(function() {
+            $('#book').turn('previous');
+            document.getElementById('turn-back-sound').play();
+        });
+
+        $('#next-button').click(function() {
+            $('#book').turn('next');
+            document.getElementById('turn-front-sound').play();
+        });
+
+        document.getElementById('prev-button').style.display = 'none';
+
+        // Add event listener for the "Read the Text" button
+        $('#read-button').click(function() {
+            var currentPage = $('#book').turn('page');
+            playAudioForPage(currentPage);
+        });
+
+        function playAudioForPage(page) {
+            if (currentAudio && !currentAudio.ended) {
+                return; // If an audio is already playing, do not start a new one
+            }
+
+            currentAudio = new Audio(page + 'h.mp3');
+            currentAudio.play();
         }
     });
-
-    for (var page = 1; page <= numberOfPages; page++) {
-        addPage(page, $('#book'));
-    }
-
-    $('#number-pages').html(numberOfPages);
-
-    $('#page-number').keydown(function(e) {
-        if (e.keyCode == 13) {
-            $('#book').turn('page', $('#page-number').val());
-        }
-    });
-
-    $('#prev-button').click(function() {
-        $('#book').turn('previous');
-        document.getElementById('turn-back-sound').play();
-    });
-
-    $('#next-button').click(function() {
-        $('#book').turn('next');
-        document.getElementById('turn-front-sound').play();
-    });
-
-    document.getElementById('prev-button').style.display = 'none';
-
-    // Add event listener for the "Read the Text" button
-    $('#read-button').click(function() {
-        var currentPage = $('#book').turn('page');
-        playAudioForPage(currentPage);
-    });
-
-    function playAudioForPage(page) {
-        var audio = new Audio(page + 'h.mp3');
-        audio.play();
-    }
-});
-
 
 </script>
 </body>
