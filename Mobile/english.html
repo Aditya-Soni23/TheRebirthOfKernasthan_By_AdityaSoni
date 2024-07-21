@@ -6,7 +6,6 @@
 <title>A story Written By Aditya Soni</title>
 <link rel="icon" href="advertisement.jpg" type="image/icon type">
 
-
 <style type="text/css">
 body {
 	background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
@@ -20,9 +19,20 @@ body {
 	font-family: 'Arial', sans-serif;
 }
 
+#container {
+	transform: rotate(90deg);
+	transform-origin: center center;
+	width: 100vh;
+	height: 100vw;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
 #book {
-	width: 800px;
-	height: 500px;
+	width: 940px;
+	height: 550px;
 	position: relative;
 	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
@@ -52,12 +62,12 @@ body {
 
 #book .loader {
 	background-image: url(loader.gif);
-	width: 24px;
+	width: 24wpx;
 	height: 24px;
 	display: block;
 	position: absolute;
-	top: 238px;
-	left: 188px;
+	top: 388px;
+	left: 138px;
 }
 
 #book .data {
@@ -78,7 +88,7 @@ body {
 }
 
 #controls {
-	width: 800px;
+	width: 2000px;
 	text-align: center;
 	margin: 20px 0px;
 	font: 30px 'Arial', sans-serif;
@@ -125,6 +135,8 @@ footer {
 	margin-top: 20px;
 	font-size: 18px;
 	color: #555;
+	width: 100%;
+	text-align: center;
 }
 toku{
 	--glow-color: rgb(246, 255, 0);
@@ -176,7 +188,9 @@ toku:active{
 </style>
 </head>
 <body>
+<div id="container">
 <center>
+	<button onclick="window.location.href='hindi.html'" style="background-color: black; color: white; font-weight: bolder; width: 200px; height: 100px; border-radius: 30px; font-size: 20px; margin-right: 1500px;">Go to Hindi</button>
 <div id="book">
 	<div class="cover">
 		<h1 style="color: red;">The Rebirth of Karnasthan</h1>
@@ -204,6 +218,7 @@ toku:active{
 </footer>
 
 </center>
+</div>
 
 <audio id="turn-front-sound" src="turnfront.mp3"></audio>
 <audio id="turn-back-sound" src="turnback.mp3"></audio>
@@ -212,15 +227,15 @@ var numberOfPages = 36;
 var storyContent = [
 		"",
 		"Once upon a time, there lived two kings, Saksham Pratap and Lalaji Prasad, who ruled their kingdoms, Atiroopa and Tajasthan, respectively. Their bond was as strong as that of brothers, marked by fraternity and harmony. They celebrated festivals together, shared resources during difficult times, and their citizens admired ",
-		"the deep friendship between the two rulers.<img style='height: 250px; width: 350px;' src='kingomstart.jpg'/>Atiroopa & Tajasthan",
+		"the deep friendship between the two rulers.<br><img style='height: 250px; width: 350px;' src='kingomstart.jpg'/><br>Atiroopa & Tajasthan",
 		"One day, Saksham Pratap announced a competition in Atiroopa: the person who achieved the greatest feat, something even Saksham could not accomplish, would become the king after his retirement. The minister of Atiroopa, a greedy and ambitious man named Bhairav, coveted the throne. Seizing an opportunity,",
 		"he visited Lalaji Prasad's palace under the pretense of their friendly relations. Warmly welcomed, Bhairav was granted access to the artillery room. Taking advantage of this, he stole crucial war strategy papers and returned to Atiroopa. Armed with this knowledge, Bhairav led a surprise night attack on Tajasthan.",
-		"<img style='height: 250px; width: 350px;' src='warpapers.jpg'/><h7>Bhairav stole important war papers...<h7><img style='height: 60px; width: 350px;' src='attack.jpg'/>Night Attack!",
+		"<img style='height: 250px; width: 350px;' src='warpapers.jpg'/><h7>Bhairav stole important war papers...<h7><img style='height: 60px; width: 350px;' src='attack.jpg'/><br>Night Attack!",
 		"The following morning, the newspapers blared the headline: Tajasthan Defeated by Atiroopa, Lalaji Prasad Imprisoned. Saksham Pratap was furious when he read the news and confronted his minister. Why did you do this? he demanded, his voice shaking with anger.Your Majesty, I did this for the achievement, ",
 		"Bhairav replied with a sly smile, expecting praise. You have ruined our relationship and stained our honor, Saksham retorted. In his rage, he executed the minister, severing his head with his sword. The act was swift, but the consequences were far-reaching. However, Lalaji Prasad, unaware of the minister's treachery, believed Saksham had",
 		"ordered the attack. Thus, a brutal war erupted between the two kingdoms. The war was relentless, and both sides suffered greatly.<img style='height: 250px; width: 350px;' src='news.jpg'/>",
 		"<img style='height: 250px; width: 350px;' src='headcut.jpg'/>Bhairav being sent to death by Saksham Pratap.......<img style='height: 70px; width: 350px;' src='cutoff.jpg'/>",
-		"Thousands perished, towns were destroyed, and buildings were reduced to rubble. Yet, both kings palaces remained intact, standing as silent witnesses to the devastation around them.<img style='height: 220px; width: 350px;' src='kingdomintact.jpg'/>",
+		"Thousands perished, towns were destroyed, and buildings were reduced to rubble. Yet, both kings palaces remained intact, standing as silent witnesses to the devastation around them.<br><img style='height: 220px; width: 350px;' src='kingdomintact.jpg'/>",
 		"Among the many casualties was Bhairav’s younger brother, Arjun, who was only seven years old when the conflict began. Consumed by the desire for revenge, he found himself trapped in Tajasthan, living unnoticed in a bunker during the war. Arjun’s life in the bunker was one of isolation and routine. The bunker was a cold, cramped",
 		"space, its walls lined with shelves of canned food and water jugs. He spent his days reading whatever books he could find, often re-reading the same ones to pass the time. Nights were filled with the distant sounds of war, the ground occasionally shaking from nearby explosions. He learned to cook simple meals, rationing his food carefully to",
 		"make it last. The loneliness was overwhelming, and he often talked to his handmade soft toy, a figure resembling Karna from the Mahabharata, for comfort.<img style='height: 250px; width: 350px;' src='bunker.jpg'/>",
@@ -247,7 +262,6 @@ var storyContent = [
 		"come. And so, in the land of Karnasthan, the spirit of fraternity and harmony that once united Saksham Pratap and Lalaji Prasad lived on, stronger and more enduring than ever before.<img style='height: 200px; width: 350px;' src='peace.jpg'/>",
 		"<img style='height: 250px; width: 350px;' src='town.jpg'/><h5>The story about how a town rebuilds itself after a war - The Rebirth Of Karnasthan,<br> Written by - Aditya Soni</h5>"
 	];
-
 
 
 
@@ -383,10 +397,6 @@ var storyContent = [
         intervalId = setInterval(playNextPage, 8000); // Adjust interval as per your audio duration
     });
 });
-
-
-
-
 </script>
 </body>
 </html>
